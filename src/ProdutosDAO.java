@@ -9,12 +9,14 @@
  */
 
 
+import com.mysql.cj.Query;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
 import javax.swing.JOptionPane;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.sql.SQLException;
+import java.util.List;
 
 
 public class ProdutosDAO {
@@ -57,12 +59,43 @@ public class ProdutosDAO {
     }
 
     public ArrayList<ProdutosDTO> listarProdutos() {
+        conn = new conectaDAO().connectDB();  // Conecta ao banco de dados
+        String sql = "SELECT * FROM produtos";  // Query para listar todos os produtos
 
-        return listagem;
+        ArrayList<ProdutosDTO> listagem = new ArrayList<>();  // Lista para armazenar os produtos
+
+        try {
+            prep = conn.prepareStatement(sql);  // Prepara a consulta
+            resultset = prep.executeQuery();  // Executa e obtém os resultados
+
+            while (resultset.next()) {  // Itera sobre os resultados
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(resultset.getInt("id"));  // Supondo que há uma coluna 'id'
+                produto.setNome(resultset.getString("nome"));
+                produto.setValor(resultset.getInt("valor"));
+                produto.setStatus(resultset.getString("status"));
+
+                listagem.add(produto);  // Adiciona o produto à lista
+            }
+        } catch (SQLException ex) {
+            System.out.println("Erro ao listar produtos: " + ex.getMessage());
+        } finally {
+            try {
+                if (resultset != null) {
+                    resultset.close();
+                }
+                if (prep != null) {
+                    prep.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return listagem;  // Retorna a lista preenchida
     }
 
-    
-    
-        
 }
 
